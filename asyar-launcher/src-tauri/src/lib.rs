@@ -121,6 +121,7 @@ impl mcp::transport::RuntimeResolver for AppRuntimeResolver {
 }
 
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut};
+pub mod accessibility;
 pub mod agents;
 pub mod ai;
 mod aliases;
