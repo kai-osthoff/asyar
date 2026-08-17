@@ -11,6 +11,8 @@
 //! The comparison lives here, platform-neutral and pure, so it is tested on
 //! every platform. The FFI that produces its inputs lives in `macos`.
 
+pub mod store;
+
 use serde::{Deserialize, Serialize};
 
 /// The identity a code signature presents: the team that signed, and the
@@ -87,7 +89,7 @@ mod tests {
 
     #[test]
     fn trusted_is_always_granted() {
-        // Wenn das OS Vertrauen meldet, ist jede Signaturbetrachtung irrelevant.
+        // When the OS reports trust, no signature consideration is relevant.
         let a = ident(
             "877MKJ6983",
             "Developer ID Application: Khoshbin Ahmed (877MKJ6983)",
@@ -105,7 +107,7 @@ mod tests {
 
     #[test]
     fn untrusted_without_history_is_not_granted() {
-        // Nie eine wirksame Freigabe gesehen → nichts über einen Fremdeintrag bekannt.
+        // Never saw a working grant, so nothing is known about a foreign entry.
         let current = ident(
             "877MKJ6983",
             "Developer ID Application: Khoshbin Ahmed (877MKJ6983)",
@@ -118,8 +120,8 @@ mod tests {
 
     #[test]
     fn untrusted_with_same_signature_is_not_granted() {
-        // Gleiche Signatur wie bei der letzten wirksamen Freigabe → der Nutzer
-        // hat die Berechtigung schlicht entzogen. Kein Stale-Eintrag.
+        // Same signature as the last working grant: the user simply revoked the
+        // permission. Not a stale entry.
         let a = ident(
             "877MKJ6983",
             "Developer ID Application: Khoshbin Ahmed (877MKJ6983)",
@@ -133,7 +135,7 @@ mod tests {
 
     #[test]
     fn untrusted_with_changed_signature_is_stale_grant() {
-        // Genau der reale Fall: Freigabe stammt vom Dev-Build, es läuft der Release.
+        // The real-world case: the grant came from a dev build, the release runs.
         let stored = ident(
             "7CZSV3JXBB",
             "Apple Development: osthoff@gmail.com (7CZSV3JXBB)",
@@ -150,7 +152,7 @@ mod tests {
 
     #[test]
     fn team_alone_decides_when_cn_is_unavailable() {
-        // SecCertificateCopySubjectSummary kann fehlschlagen; die Team-ID reicht.
+        // SecCertificateCopySubjectSummary can fail; the team id alone decides.
         let stored = SigningIdentity {
             team_id: Some("7CZSV3JXBB".into()),
             leaf_cn: None,
@@ -167,7 +169,7 @@ mod tests {
 
     #[test]
     fn unknown_current_signature_cannot_decide_stale() {
-        // Unsigniertes lokales Build: nichts zu vergleichen → nicht raten.
+        // Unsigned local build: nothing to compare against, so do not guess.
         let stored = ident(
             "7CZSV3JXBB",
             "Apple Development: osthoff@gmail.com (7CZSV3JXBB)",
