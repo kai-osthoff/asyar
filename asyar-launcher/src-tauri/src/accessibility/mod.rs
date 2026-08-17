@@ -13,6 +13,36 @@
 
 pub mod store;
 
+#[cfg(target_os = "macos")]
+mod macos;
+
+#[cfg(target_os = "macos")]
+pub use macos::{current_signature, is_trusted, request_trust_prompt, reset_tcc_entry};
+
+/// Off macOS there is no Accessibility gate: everything is permitted, there is
+/// no signature to compare, and nothing to repair.
+#[cfg(not(target_os = "macos"))]
+mod fallback {
+    use super::SigningIdentity;
+    use crate::error::AppError;
+
+    pub fn is_trusted() -> bool {
+        true
+    }
+    pub fn request_trust_prompt() -> bool {
+        true
+    }
+    pub fn current_signature() -> Option<SigningIdentity> {
+        None
+    }
+    pub fn reset_tcc_entry() -> Result<(), AppError> {
+        Ok(())
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+pub use fallback::{current_signature, is_trusted, request_trust_prompt, reset_tcc_entry};
+
 use serde::{Deserialize, Serialize};
 
 /// The identity a code signature presents: the team that signed, and the
@@ -165,6 +195,25 @@ mod tests {
             classify(false, Some(&stored), Some(&current)),
             AccessibilityKind::StaleGrant
         );
+    }
+
+    #[test]
+    #[cfg(not(target_os = "macos"))]
+    fn non_macos_is_always_trusted() {
+        // Without a TCC equivalent nothing may be blocked or warned about.
+        assert!(is_trusted());
+        assert_eq!(
+            classify(is_trusted(), None, None),
+            AccessibilityKind::Granted
+        );
+    }
+
+    #[test]
+    #[cfg(target_os = "macos")]
+    fn macos_signature_lookup_does_not_panic() {
+        // The value depends on how this build was signed; the assurance here is
+        // that the FFI path runs cleanly.
+        let _ = current_signature();
     }
 
     #[test]
