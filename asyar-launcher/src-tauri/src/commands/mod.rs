@@ -1,3 +1,4 @@
+pub mod accessibility;
 pub mod agents;
 pub mod app;
 pub mod app_events;
