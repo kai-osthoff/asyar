@@ -5,6 +5,7 @@ import { createPersistence } from '../../lib/persistence/extensionStore';
 import { logService } from '../../services/log/logService';
 import { resolveTemplate } from '../../lib/placeholders';
 import { secretRedactionService } from '../../services/privacy/secretRedactionService.svelte';
+import { accessibilityStatusService } from '../../services/permissions/accessibilityStatus.svelte';
 
 export const enabledPersistence = createPersistence<boolean>(
   'asyar:snippets:enabled',
@@ -82,6 +83,10 @@ export const snippetService = {
     if (expanding) return;
     expanding = true;
     try {
+      // Expansion needs the same permission as pasting. Without this the
+      // warning would stay silent for someone who only uses snippets, and the
+      // expansion would fail with no explanation at all.
+      if (!(await accessibilityStatusService.ensureGranted())) return;
       const resolved = await resolveTemplate(expansion, {});
       await writeText(resolved);
       await commands.expandAndPaste(keywordLen);
@@ -91,6 +96,7 @@ export const snippetService = {
   },
 
   async pasteSnippet(expansion: string): Promise<void> {
+    if (!(await accessibilityStatusService.ensureGranted())) return;
     const resolved = await resolveTemplate(expansion, {});
     await writeText(resolved);
     await commands.hideWindow();

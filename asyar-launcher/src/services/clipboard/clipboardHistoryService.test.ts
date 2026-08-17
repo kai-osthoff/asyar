@@ -30,6 +30,13 @@ vi.mock('tauri-plugin-clipboard-x-api', () => ({
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }));
 
+vi.mock('../permissions/accessibilityStatus.svelte', () => ({
+  accessibilityStatusService: {
+    ensureGranted: vi.fn(async () => true),
+    status: 'granted',
+  },
+}));
+
 // Default: the move succeeds, mirroring Rust's `$APPDATA/clipboard_cache/<id>.png`.
 // Tests that care about a failed move override this per case.
 vi.mock('../../lib/ipc/clipboardCacheCommands', () => ({
@@ -86,6 +93,7 @@ import { clipboardPrivacyService } from '../privacy/clipboardPrivacyService.svel
 import { secretRedactionService } from '../privacy/secretRedactionService.svelte';
 import { clipboardHistoryStore } from './stores/clipboardHistoryStore.svelte';
 import { clipboardAdoptImage, clipboardForgetImage } from '../../lib/ipc/clipboardCacheCommands';
+import { accessibilityStatusService } from '../permissions/accessibilityStatus.svelte';
 
 function getInstance(): ClipboardHistoryService {
   return new ClipboardHistoryService();
@@ -879,13 +887,10 @@ describe('pasteItem', () => {
     expect(simulatePasteSpy).toHaveBeenCalled();
   });
 
-  it('skips the clipboard write and opens Accessibility settings when permission is denied', async () => {
+  it('skips the clipboard write and stays out of System Settings when permission is missing', async () => {
     const svc = getInstance();
 
-    // check_accessibility_permission resolves false; open_accessibility_preferences resolves undefined.
-    vi.mocked(invoke).mockImplementation(async (cmd: string) =>
-      cmd === 'check_accessibility_permission' ? false : undefined,
-    );
+    vi.mocked(accessibilityStatusService.ensureGranted).mockResolvedValue(false);
 
     const hideWindowSpy = vi.spyOn(svc, 'hideWindow').mockResolvedValue(undefined);
     const writeToClipboardSpy = vi.spyOn(svc, 'writeToClipboard').mockResolvedValue(undefined);
@@ -901,8 +906,10 @@ describe('pasteItem', () => {
     expect(simulatePasteSpy).not.toHaveBeenCalled();
     expect(hideWindowSpy).not.toHaveBeenCalled();
 
-    // Jumps the user straight to the right System Settings pane.
-    expect(invoke).toHaveBeenCalledWith('open_accessibility_preferences', undefined);
+    // A System Settings window springing up on every attempt reads as a
+    // malfunction, and it lands on a pane that may not even list Asyar. The
+    // persistent warning and the Settings section explain the situation instead.
+    expect(invoke).not.toHaveBeenCalledWith('open_accessibility_preferences', undefined);
 
     // Surfaces a guiding diagnostic mentioning Accessibility.
     expect(feedbackService.report).toHaveBeenCalledWith(
@@ -914,6 +921,29 @@ describe('pasteItem', () => {
         }),
       }),
     );
+  });
+
+  it('names the stale-entry case instead of telling the user to enable an already-enabled app', async () => {
+    const svc = getInstance();
+
+    vi.mocked(accessibilityStatusService.ensureGranted).mockResolvedValue(false);
+    vi.mocked(accessibilityStatusService).status = 'stale_grant';
+
+    vi.spyOn(svc, 'hideWindow').mockResolvedValue(undefined);
+    vi.spyOn(svc, 'writeToClipboard').mockResolvedValue(undefined);
+    vi.spyOn(svc, 'simulatePaste').mockResolvedValue(true);
+
+    await svc.pasteItem(makeItem(ClipboardItemType.Text, 'pasted content'));
+
+    expect(feedbackService.report).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({
+          message: expect.stringContaining('older build'),
+        }),
+      }),
+    );
+
+    vi.mocked(accessibilityStatusService).status = 'granted';
   });
 });
 

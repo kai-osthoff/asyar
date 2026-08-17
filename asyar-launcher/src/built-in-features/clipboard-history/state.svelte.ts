@@ -11,6 +11,8 @@ import {
 import { shiftIndex } from '../../lib/listSelection.svelte';
 import { clipboardHistoryStore } from '../../services/clipboard/stores/clipboardHistoryStore.svelte';
 import { feedbackService } from '../../services/feedback/feedbackService.svelte';
+import { accessibilityStatusService } from '../../services/permissions/accessibilityStatus.svelte';
+import { accessibilityPasteMessage } from '../../services/permissions/accessibilityMessages';
 import * as commands from '../../lib/ipc/commands';
 
 export class ClipboardViewStateClass {
@@ -313,17 +315,14 @@ export class ClipboardViewStateClass {
       // Checked up front (mirrors the internal check in
       // clipboardHistoryService.pasteItem): a permission-denied no-op must
       // not clear the selection the user just built.
-      if (!(await commands.checkAccessibilityPermission())) {
-        await commands.openAccessibilityPreferences();
+      if (!(await accessibilityStatusService.ensureGranted())) {
         feedbackService.report({
           source: 'frontend',
           kind: 'manual',
           severity: 'warning',
           retryable: false,
           context: {
-            message:
-              'Asyar needs macOS Accessibility permission to paste. Enable Asyar under ' +
-              'System Settings → Privacy & Security → Accessibility, then try again.',
+            message: accessibilityPasteMessage(accessibilityStatusService.status),
           },
         });
         return;

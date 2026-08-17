@@ -20,6 +20,13 @@ vi.mock('../../services/clipboard/stores/clipboardHistoryStore.svelte', () => ({
   },
 }));
 
+vi.mock('../../services/permissions/accessibilityStatus.svelte', () => ({
+  accessibilityStatusService: {
+    ensureGranted: vi.fn(async () => true),
+    status: 'granted',
+  },
+}));
+
 vi.mock('../../services/feedback/feedbackService.svelte', () => ({
   feedbackService: { report: vi.fn() },
 }));
@@ -42,6 +49,7 @@ vi.mock('../../lib/ipc/commands', () => ({
 import { ClipboardViewStateClass } from './state.svelte';
 import { clipboardHistoryStore } from '../../services/clipboard/stores/clipboardHistoryStore.svelte';
 import * as commands from '../../lib/ipc/commands';
+import { accessibilityStatusService } from '../../services/permissions/accessibilityStatus.svelte';
 import { feedbackService } from '../../services/feedback/feedbackService.svelte';
 
 describe('ClipboardViewStateClass paste action proxy issue', () => {
@@ -751,7 +759,7 @@ describe('pasteMergedSelection', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(commands.checkAccessibilityPermission).mockResolvedValue(true);
+    vi.mocked(accessibilityStatusService.ensureGranted).mockResolvedValue(true);
     vi.mocked(commands.clipboardGetMergedText).mockResolvedValue({
       text: 'first\nsecond',
       skippedCount: 0,
@@ -802,11 +810,14 @@ describe('pasteMergedSelection', () => {
   });
 
   it('does not clear the selection when accessibility permission is denied', async () => {
-    vi.mocked(commands.checkAccessibilityPermission).mockResolvedValue(false);
+    vi.mocked(accessibilityStatusService.ensureGranted).mockResolvedValue(false);
 
     await state.pasteMergedSelection();
 
-    expect(commands.openAccessibilityPreferences).toHaveBeenCalled();
+    // The selection the user just built survives, and no System Settings
+    // window springs up uninvited — the warning and the Settings section carry
+    // the explanation instead.
+    expect(commands.openAccessibilityPreferences).not.toHaveBeenCalled();
     expect(commands.clipboardGetMergedText).not.toHaveBeenCalled();
     expect(mockClipboardService.pasteItem).not.toHaveBeenCalled();
     expect(state.selectedIds).toEqual(['1', '2']);

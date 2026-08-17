@@ -50,6 +50,13 @@ vi.mock('../../lib/persistence/extensionStore', () => ({
   }),
 }));
 
+vi.mock('../../services/permissions/accessibilityStatus.svelte', () => ({
+  accessibilityStatusService: {
+    ensureGranted: vi.fn(async () => true),
+    status: 'granted',
+  },
+}));
+
 vi.mock('../../services/log/logService', () => ({
   logService: { warn: mockWarn, error: vi.fn() },
 }));

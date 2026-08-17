@@ -27,6 +27,8 @@ import { getFrontmostApplication } from '../../lib/ipc/applicationCommands';
 import { clipboardStripHtml, clipboardStripRtf } from '../../lib/ipc/clipboardCommands';
 import { v4 as uuidv4 } from 'uuid';
 import { feedbackService } from '../feedback/feedbackService.svelte';
+import { accessibilityStatusService } from '../permissions/accessibilityStatus.svelte';
+import { accessibilityPasteMessage } from '../permissions/accessibilityMessages';
 import { clipboardHistoryStore } from './stores/clipboardHistoryStore.svelte';
 import { clipboardPrivacyService } from '../privacy/clipboardPrivacyService.svelte';
 import { secretRedactionService } from '../privacy/secretRedactionService.svelte';
@@ -424,17 +426,19 @@ export class ClipboardHistoryService implements IClipboardHistoryService {
       // Check first, before touching the clipboard: writing then failing to paste
       // would otherwise re-add the content as a duplicate history entry, and the
       // window would already be hidden so the user would never see the failure.
-      if (!(await commands.checkAccessibilityPermission())) {
-        await commands.openAccessibilityPreferences();
+      //
+      // Deliberately no System Settings window here. Opening one on every
+      // attempt reads as a malfunction, and it lands the user on a pane that
+      // may not even list Asyar. The persistent warning and the Settings
+      // section explain the situation instead.
+      if (!(await accessibilityStatusService.ensureGranted())) {
         void feedbackService.report({
           source: 'frontend',
           kind: 'manual',
           severity: 'warning',
           retryable: false,
           context: {
-            message:
-              'Asyar needs macOS Accessibility permission to paste. Enable Asyar under ' +
-              'System Settings → Privacy & Security → Accessibility, then try again.',
+            message: accessibilityPasteMessage(accessibilityStatusService.status),
           },
         });
         return;
