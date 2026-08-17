@@ -4,6 +4,7 @@
 // `*Commands.ts` module; this file only re-exports them. Add new wrappers to
 // the matching module (or a new one) — never inline a wrapper in this barrel.
 
+export * from './accessibilityCommands';
 export * from './extensionPreferencesCommands';
 export * from './commandArgDefaultsCommands';
 export * from './argumentModelCommands';
