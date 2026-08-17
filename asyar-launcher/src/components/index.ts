@@ -113,6 +113,7 @@ export { default as SectionedResultsList } from './list/SectionedResultsList.sve
 export { default as ShellConsentDialog } from './shell/ShellConsentDialog.svelte';
 
 // Settings — sections
+export { default as AccessibilityPermissionSection } from './settings/AccessibilityPermissionSection.svelte';
 export { default as ClipboardPrivacySection } from './settings/ClipboardPrivacySection.svelte';
 export { default as CrashReportSection } from './settings/CrashReportSection.svelte';
 export { default as EncryptionStatusSection } from './settings/EncryptionStatusSection.svelte';

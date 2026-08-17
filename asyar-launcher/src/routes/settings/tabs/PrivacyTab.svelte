@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import {
+    AccessibilityPermissionSection,
     ClipboardPrivacySection,
     CrashReportSection,
     EncryptionStatusSection,
@@ -24,6 +25,10 @@
 </script>
 
 <div class="privacy-tab">
+  <div id="privacy-accessibility" class="anchor-group">
+    <AccessibilityPermissionSection />
+  </div>
+
   <div id="privacy-encryption" class="anchor-group">
     <EncryptionStatusSection />
   </div>
