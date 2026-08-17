@@ -10,6 +10,7 @@
   import PrimaryActionDisplay from './PrimaryActionDisplay.svelte';
   import BottomBarButton from './BottomBarButton.svelte';
   import FeedbackBar from './FeedbackBar.svelte';
+  import AccessibilityChip from './AccessibilityChip.svelte';
   import StatusDot from '../base/StatusDot.svelte';
   import InformationPanel from './InformationPanel.svelte';
   import ShowMoreBarHuds from './ShowMoreBarHuds.svelte';
@@ -116,6 +117,8 @@
   </div>
 
   <div class="flex items-center gap-3 flex-shrink-0">
+    <AccessibilityChip />
+
     <PrimaryActionDisplay
       {selectedItem}
       activeViewLabel={viewManager.activeViewPrimaryActionLabel}
