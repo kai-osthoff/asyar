@@ -7,6 +7,7 @@ import {
 } from '../../lib/ipc/commands';
 import { createPersistence } from '../../lib/persistence/extensionStore';
 import { logService } from '../log/logService';
+import { t } from '../i18n';
 
 export type { AccessibilityKind };
 
@@ -77,10 +78,10 @@ export class AccessibilityStatusService {
       const message = String(e);
       // A cancelled authentication dialog is a decision, not a defect.
       if (message.toLowerCase().includes('cancelled')) {
-        return { ok: false, error: 'Repair cancelled.' };
+        return { ok: false, error: t('settings.privacy.accessibility_repair_cancelled') };
       }
       logService.error(`[accessibility] repair failed: ${message}`);
-      return { ok: false, error: 'Repair failed. Follow the manual steps below.' };
+      return { ok: false, error: t('settings.privacy.accessibility_repair_failed') };
     }
   }
 

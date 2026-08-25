@@ -298,7 +298,6 @@
       "table_enabled": "Enabled",
       "add_directory_title": "Add Application Directory"
     },
-
     "browsers": {
       "no_browsers": "No browsers paired yet",
       "no_browsers_description": "Install the Asyar Companion extension below — once it's running, it pairs automatically and your browser shows up here.",
@@ -423,7 +422,33 @@
       "rotate_dialog_body": "Your recovery phrase will not change — only the passphrase used to unlock encrypted sync.",
       "error_rotate_failed": "Couldn't change passphrase. Check the old passphrase and try again.",
       "error_passwords_mismatch": "New passphrases don't match.",
-      "changing": "Changing…"
+      "changing": "Changing…",
+      "accessibility": "Accessibility",
+      "accessibility_permission": "macOS Accessibility",
+      "accessibility_granted": "Granted",
+      "accessibility_not_in_effect": "Not in effect",
+      "accessibility_not_granted": "Not granted",
+      "accessibility_unavailable": "Status unavailable",
+      "accessibility_desc_granted": "Asyar can paste, expand snippets, and read your selection.",
+      "accessibility_desc_stale": "System Settings lists Asyar as enabled, but the entry was created for an older build of Asyar and no longer applies. macOS ties each entry to a code signature, so switching it off and on again will not help — the entry has to be removed and recreated.",
+      "accessibility_desc_unavailable": "Asyar could not read the permission state.",
+      "accessibility_desc_not_granted": "Pasting from clipboard history and snippet expansion need this permission. Without it macOS silently discards the keystroke.",
+      "accessibility_grant": "Grant permission",
+      "accessibility_open_settings": "Open System Settings",
+      "accessibility_repair_step_remove": "In System Settings → Privacy & Security → Accessibility, select Asyar and remove it with the “−” button.",
+      "accessibility_repair_step_restart": "Quit and reopen Asyar.",
+      "accessibility_repair_step_grant": "Grant the permission again with the button above.",
+      "accessibility_copy": "Copy",
+      "accessibility_copied": "Copied",
+      "accessibility_repair_auto": "Repair automatically (asks for your administrator password)",
+      "accessibility_repair_done": "Entry removed. Now grant the permission again.",
+      "accessibility_repair_cancelled": "Repair cancelled.",
+      "accessibility_repair_failed": "Repair failed. Follow the manual steps below.",
+      "accessibility_cant_paste": "Can’t paste",
+      "accessibility_chip_stale": "Asyar’s Accessibility entry belongs to an older build of Asyar, so it no longer applies. Open Settings to repair it.",
+      "accessibility_chip_not_granted": "Asyar needs macOS Accessibility permission to paste. Open Settings to grant it.",
+      "accessibility_paste_stale": "Asyar can’t paste: its Accessibility entry belongs to an older build of Asyar. Open Settings → Privacy to repair it.",
+      "accessibility_paste_not_granted": "Asyar needs macOS Accessibility permission to paste. Open Settings → Privacy to grant it."
     },
     "about": {
       "section_updates": "Updates",
@@ -562,7 +587,6 @@
       "no_other_notes": "No other notes yet",
       "link_to_note": "Link to note"
     },
-
     "walkthrough": {
       "title": "Walkthrough",
       "no_tasks": "No walkthrough tasks yet",
@@ -641,7 +665,6 @@
       "write_placeholder": "Write something…",
       "note_deleted": "This note no longer exists."
     },
-
     "runs": {
       "no_runs": "No runs yet",
       "no_runs_description": "Runs from AI chat or shell scripts will appear here.",

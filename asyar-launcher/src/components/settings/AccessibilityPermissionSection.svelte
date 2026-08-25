@@ -5,6 +5,7 @@
   import StatusDot from '../base/StatusDot.svelte';
   import Button from '../base/Button.svelte';
   import { accessibilityStatusService as svc } from '../../services/permissions/accessibilityStatus.svelte';
+  import { t } from '../../services/i18n';
 
   const RESET_COMMAND = 'sudo tccutil reset Accessibility org.asyar.app';
 
@@ -13,22 +14,22 @@
 
   let dot = $derived(
     svc.status === 'granted'
-      ? { color: 'success' as const, label: 'Granted' }
+      ? { color: 'success' as const, label: t('settings.privacy.accessibility_granted') }
       : svc.status === 'stale_grant'
-        ? { color: 'warning' as const, label: 'Not in effect' }
+        ? { color: 'warning' as const, label: t('settings.privacy.accessibility_not_in_effect') }
         : svc.status === 'unknown'
-          ? { color: 'info' as const, label: 'Status unavailable' }
-          : { color: 'warning' as const, label: 'Not granted' },
+          ? { color: 'info' as const, label: t('settings.privacy.accessibility_unavailable') }
+          : { color: 'warning' as const, label: t('settings.privacy.accessibility_not_granted') },
   );
 
   let description = $derived(
     svc.status === 'granted'
-      ? 'Asyar can paste, expand snippets, and read your selection.'
+      ? t('settings.privacy.accessibility_desc_granted')
       : svc.status === 'stale_grant'
-        ? 'System Settings lists Asyar as enabled, but the entry was created for an older build of Asyar and no longer applies. macOS ties each entry to a code signature, so switching it off and on again will not help — the entry has to be removed and recreated.'
+        ? t('settings.privacy.accessibility_desc_stale')
         : svc.status === 'unknown'
-          ? 'Asyar could not read the permission state.'
-          : 'Pasting from clipboard history and snippet expansion need this permission. Without it macOS silently discards the keystroke.',
+          ? t('settings.privacy.accessibility_desc_unavailable')
+          : t('settings.privacy.accessibility_desc_not_granted'),
   );
 
   async function copyCommand() {
@@ -40,7 +41,7 @@
     repairMessage = null;
     const result = await svc.repair();
     repairMessage = result.ok
-      ? 'Entry removed. Now grant the permission again.'
+      ? t('settings.privacy.accessibility_repair_done')
       : (result.error ?? null);
   }
 
@@ -54,9 +55,9 @@
   });
 </script>
 
-<div class="section-header">Accessibility</div>
+<div class="section-header">{t('settings.privacy.accessibility')}</div>
 <SettingsCard>
-  <SettingsRow label="macOS Accessibility" {description}>
+  <SettingsRow label={t('settings.privacy.accessibility_permission')} {description}>
     {#snippet children()}
       <div class="status-row">
         <StatusDot color={dot.color} />
@@ -67,28 +68,33 @@
 
   {#if svc.status !== 'granted'}
     <div class="actions">
-      <Button onclick={() => svc.requestPermission()}>Grant permission</Button>
-      <button class="link" onclick={() => svc.openPreferences()}>Open System Settings</button>
+      <Button onclick={() => svc.requestPermission()}
+        >{t('settings.privacy.accessibility_grant')}</Button
+      >
+      <button class="link" onclick={() => svc.openPreferences()}>
+        {t('settings.privacy.accessibility_open_settings')}
+      </button>
     </div>
   {/if}
 
   {#if svc.status === 'stale_grant'}
     <div class="repair">
       <ol class="steps">
-        <li>
-          In System Settings → Privacy &amp; Security → Accessibility, select Asyar and remove it
-          with the “−” button.
-        </li>
-        <li>Quit and reopen Asyar.</li>
-        <li>Grant the permission again with the button above.</li>
+        <li>{t('settings.privacy.accessibility_repair_step_remove')}</li>
+        <li>{t('settings.privacy.accessibility_repair_step_restart')}</li>
+        <li>{t('settings.privacy.accessibility_repair_step_grant')}</li>
       </ol>
       <div class="command-row">
         <code>{RESET_COMMAND}</code>
-        <button class="link" onclick={copyCommand}>{copied ? 'Copied' : 'Copy'}</button>
+        <button class="link" onclick={copyCommand}
+          >{copied
+            ? t('settings.privacy.accessibility_copied')
+            : t('settings.privacy.accessibility_copy')}</button
+        >
       </div>
       <div class="auto-repair">
         <Button onclick={runRepair}>
-          Repair automatically (asks for your administrator password)
+          {t('settings.privacy.accessibility_repair_auto')}
         </Button>
         {#if repairMessage}
           <p class="repair-message">{repairMessage}</p>

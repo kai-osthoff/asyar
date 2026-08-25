@@ -2,6 +2,7 @@
   import StatusDot from '../base/StatusDot.svelte';
   import { accessibilityStatusService as svc } from '../../services/permissions/accessibilityStatus.svelte';
   import { showSettingsWindow } from '../../lib/ipc/commands';
+  import { t } from '../../services/i18n';
 
   // Sits in the bottom bar's fixed-height cluster rather than in the results
   // area: the launcher shell is a deliberately static 480px layout, and a
@@ -20,11 +21,11 @@
     class="ax-chip"
     onclick={openSettings}
     title={svc.status === 'stale_grant'
-      ? 'Asyar’s Accessibility entry belongs to an older build of Asyar, so it no longer applies. Open Settings to repair it.'
-      : 'Asyar needs macOS Accessibility permission to paste. Open Settings to grant it.'}
+      ? t('settings.privacy.accessibility_chip_stale')
+      : t('settings.privacy.accessibility_chip_not_granted')}
   >
     <StatusDot color="warning" />
-    <span>Can’t paste</span>
+    <span>{t('settings.privacy.accessibility_cant_paste')}</span>
   </button>
 {/if}
 
